@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "row.h"
+#include "table.h"
 
 
 void prompt() { printf("db > "); }
@@ -21,6 +22,12 @@ enum PrepareResult
 	PREPARE_SUCCESS,
 	PREPARE_SYNTAX_ERROR,
 	PREPARE_UNRECOGNIZED_STATEMENT
+};
+
+enum ExecuteResult
+{
+	EXECUTE_SUCCESS,
+	EXECUTE_TABLE_FULL
 };
 
 enum StatementType
@@ -67,38 +74,72 @@ MetaCommandResult do_meta_command(const std::string& input_buffer)
 
 PrepareResult prepare_statement(const std::string& input_buffer, Statement& statement)
 {
-	if (input_buffer.compare(0, Commands::insert.size(), Commands::insert) == 0)
+	std::istringstream ss(input_buffer);
+	std::string cmd;
+	ss >> cmd;
+
+	if (cmd == Commands::insert)
 	{
 		statement.type = STATEMENT_INSERT;
 
-		std::istringstream ss(input_buffer);
+		uint32_t id;
+		std::string username, email;
 
-		ss >> statement.row_to_insert.id >> statement.row_to_insert.username >> statement.row_to_insert.email;
+		ss >> id >> username >> email;
+
+		statement.row_to_insert = Row(id, std::move(username), std::move(email));
 
 		if (ss.fail())
 			return PREPARE_SYNTAX_ERROR;
 
 		return PREPARE_SUCCESS;
 	}
-	else if (input_buffer == Commands::select)
+	else if (cmd == Commands::select)
 	{
 		statement.type = STATEMENT_SELECT;
+
 		return PREPARE_SUCCESS;
 	}
 	else
 		return PREPARE_UNRECOGNIZED_STATEMENT;
 }
 
-void execute_statement(const Statement& statement)
+ExecuteResult execute_insert(const Statement& statement, Table& table)
+{
+	if (table.num_rows >= TABLE_MAX_ROWS)
+		return EXECUTE_TABLE_FULL;
+
+	// TODO: change for:
+	// TODO: table.insert(statement.row);
+	auto slot = row_slot(table, table.num_rows);
+	serialize_row(statement.row_to_insert, *slot.first.get(), slot.second);
+	table.num_rows++;
+
+	return EXECUTE_SUCCESS;
+}
+
+ExecuteResult execute_select(const Statement& statement, Table& table)
+{
+	Row row;
+
+	for (uint32_t i = 0; i < table.num_rows; i++)
+	{
+		auto slot = row_slot(table, i);
+		deserialize_row(*slot.first.get(), slot.second, row);
+		print_row(row);
+	}
+
+	return EXECUTE_SUCCESS;
+}
+
+ExecuteResult execute_statement(const Statement& statement, Table& table)
 {
 	switch (statement.type)
 	{
 		case (STATEMENT_INSERT):
-			std::cout << "This is where we would do an insert." << std::endl;
-			break;
+			return execute_insert(statement, table);
 		case (STATEMENT_SELECT):
-			std::cout << "This is where we would do an select." << std::endl;
-			break;
+			return execute_select(statement, table);
 	}
 }
 
@@ -106,6 +147,8 @@ void execute_statement(const Statement& statement)
 
 int main(int argc, char* argv[])
 {
+	auto table = std::make_unique<Table>();
+
 	std::string input_buffer;
 
 	while (true)
@@ -137,16 +180,22 @@ int main(int argc, char* argv[])
 		{
 			case (PREPARE_SUCCESS):
 				break;
-			case (PREPARE_UNRECOGNIZED_STATEMENT):
-				std::cout << "Unrecognized keyword at start of '" << input_buffer << "'." << std::endl;
-				continue;
 			case (PREPARE_SYNTAX_ERROR):
 				std::cout << "Syntax error. Could not parse statement." << std::endl;
 				continue;
+			case (PREPARE_UNRECOGNIZED_STATEMENT):
+				std::cout << "Unrecognized keyword at start of '" << input_buffer << "'." << std::endl;
+				continue;
 		}
 
-		execute_statement(statement);
-
-		std::cout << "Executed." << std::endl;
+		switch (execute_statement(statement, *table.get()))
+		{
+			case (EXECUTE_SUCCESS):
+				std::cout << "Executed." << std::endl;
+				break;
+			case (EXECUTE_TABLE_FULL):
+				std::cout << "Error: Table full." << std::endl;
+				break;
+		}
 	}
 }
