@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "parser/parser.h"
 #include "processor/processor.h"
 #include "utils.h"
 
@@ -21,12 +20,11 @@ public:
 		return instance;
 	}
 
-	bool ProcessInput(const std::string& input); // TODO: multi-threading ?
+	bool ProcessQuery(const std::string& input); // TODO: multi-threading ?
 
-	static SQLParser& parser() { return *instance().parser_; }
 	static SQLProcessor& processor() { return *instance().processor_; }
 
 private:
-	std::unique_ptr<SQLParser> parser_;
+	std::unique_ptr<MetaCommandParser> parser_;
 	std::unique_ptr<SQLProcessor> processor_;
 };

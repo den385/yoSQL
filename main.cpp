@@ -43,15 +43,15 @@ void read_statement(std::istream& is, std::string& s)
 
 int main(int argc, char* argv[])
 {
-	std::string input;
+	std::string query;
 
 	while (true)
 	{
 		prompt();
 
-		read_statement(std::cin, input);
+		read_statement(std::cin, query);
 
-		bool ok = EngineInstance::instance().ProcessInput(input);
+		bool ok = EngineInstance::instance().ProcessQuery(query);
 
 		if (!ok)
 			break;

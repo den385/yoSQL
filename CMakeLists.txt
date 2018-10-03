@@ -3,18 +3,27 @@ project(sql_engine)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(${CMAKE_SOURCE_DIR})
 
-add_executable(sql_engine main.cpp row/row.cpp row/row.h table/table.cpp table/table.h page/page.cpp page/page.h parser/parser.cpp parser/parser.h processor/processor.cpp processor/processor.h engine_instance.cpp engine_instance.h utils.h command/command.cpp command/command.h)
+set(SHARED_DIR "${CMAKE_SOURCE_DIR}/../shared")
+set(BOOST_LATEST_SOURCE_DIR "${SHARED_DIR}/boost_1_68_0")
+set(BOOST_LATEST_BIN_DIR "${BOOST_LATEST_SOURCE_DIR}/stage/lib")
+set(BOOST_LATEST_INCLUDE_DIR "${BOOST_LATEST_SOURCE_DIR}/boost")
+set(BOOST_LATEST_LIBS "libboost_system.so" "libboost_filesystem.so" "libboost_thread.so")
 
-set(BOOST_LIBRARYDIR "/usr/lib/x86_64-linux-gnu/")
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
+set(HYRISE_SQL_PARSER_DIR "${SHARED_DIR}/hyrise_sql_parser")
+set(HYRISE_SQL_PARSER_SOURCE_DIR ${HYRISE_SQL_PARSER_SOURCE_DIR})
+set(HYRISE_SQL_PARSER_BIN_DIR "${SHARED_DIR}/hyrise_sql_parser")
+set(HYRISE_SQL_PARSER_INCLUDE_DIR "${SHARED_DIR}/hyrise_sql_parser/src")
+set(HYRISE_SQL_PARSER_LIBS "libsqlparser.so")
 
-find_package(Boost 1.65.0 REQUIRED COMPONENTS system thread filesystem)
 
-if(Boost_FOUND)
-	include_directories(${Boost_INCLUDE_DIRS})
-	target_link_libraries(sql_engine Boost::system Boost::thread)
-endif()
+include_directories(${CMAKE_SOURCE_DIR} ${BOOST_LATEST_INCLUDE_DIR} ${HYRISE_SQL_PARSER_INCLUDE_DIR})
+
+link_directories(${BOOST_LATEST_BIN_DIR} ${HYRISE_SQL_PARSER_BIN_DIR})
+
+add_executable(sql_engine main.cpp row/row.cpp row/row.h table/table.cpp table/table.h page/page.cpp page/page.h
+		processor/processor.cpp processor/processor.h engine_instance.cpp engine_instance.h utils.h
+		meta_command_parser/meta_command_parser.cpp meta_command_parser/meta_command_parser.h)
+
+
+target_link_libraries(sql_engine ${BOOST_LATEST_LIBS} ${HYRISE_SQL_PARSER_LIBS})

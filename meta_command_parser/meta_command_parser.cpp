@@ -1,4 +1,6 @@
-#include "parser/parser.h"
+#include "meta_command_parser/meta_command_parser.h"
+
+
 
 
 
@@ -27,10 +29,7 @@
 //
 //
 //
-//namespace MetaCommands
-//{
-//	const std::string exit = ".exit";
-//}
+
 //
 //namespace Commands
 //{
@@ -82,9 +81,9 @@ SQLCommand SQLParser::parse(const std::string& statement)
 
 //	if (statement.at(0) == '.')
 //	{
-//		auto meta_command = do_meta_command(input_buffer);
+//		auto meta_command_parser = do_meta_command(input_buffer);
 //
-//		switch (meta_command)
+//		switch (meta_command_parser)
 //		{
 //			case (META_COMMAND_EXIT):
 //				exit(EXIT_SUCCESS);
