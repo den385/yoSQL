@@ -1,7 +1,9 @@
+#include <iostream>
+
 #include "engine_instance.h"
 
 #include "SQLParser.h"
-
+#include "boost/system/error_code.hpp"
 #include "boost/algorithm/string.hpp"
 
 
@@ -9,26 +11,43 @@
 EngineInstance::EngineInstance()
 {
 	processor_ = std::make_unique<SQLProcessor>();
+	terminal_ = std::make_unique<Terminal>(std::cin, std::cout);
 }
 
 EngineInstance::~EngineInstance()
 {
+	if (qdb_file_.is_open())
+		qdb_file_.close();
+
+	terminal_.reset();
 	processor_.reset();
 }
 
 
 
-bool EngineInstance::ProcessQuery(const std::string& query)
+bool EngineInstance::Run()
+{
+	while (true)
+	{
+		std::string query = terminal_->Read();
+
+		if(!process_query(query))
+			break;
+	}
+}
+
+
+
+bool EngineInstance::process_query(const std::string& query)
 {
 	if (query.at(0) == '.')
-		if (!process_meta_command(query))
-			return false;
+		return process_meta_command(query);
 
 	hsql::SQLParserResult result;
-    hsql::SQLParser::parse(query, &result);
+	hsql::SQLParser::parse(query, &result);
 
-    if (result.isValid() && result.size() > 0)
-	    processor_->ProcessCommand(result);
+	if (result.isValid() && result.size() > 0)
+		processor_->ProcessCommand(result);
 	else
 		return false;
 
@@ -37,12 +56,19 @@ bool EngineInstance::ProcessQuery(const std::string& query)
 
 
 
-bool EngineInstance::open_file(const std::string& filename, bool is_new)
+bool EngineInstance::open_file(const std::string& filepath, bool is_new)
 {
-	// TODO: ifstream f (ios::binary || (is_new ? ios::new | ios::something_else))
-	// TODO: if (!f.is_open())
-	// TODO:    return false
-	// TODO: pager.reset(f)
+	if (qdb_file_.is_open())
+		qdb_file_.close();
+
+	if (is_new)
+		qdb_file_.open(filepath, std::ios::in);
+	else
+		qdb_file_.open(filepath);
+
+	// qdb_file_ << "Writing this to a file.\n";
+	// TODO: pager.reset(f) ?
+	// reset pages, rows, tables etc.
 
 	return true;
 }
