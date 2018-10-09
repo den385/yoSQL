@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(sql_engine)
+project(yoSQL)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -21,9 +21,9 @@ include_directories(${CMAKE_SOURCE_DIR} ${BOOST_LATEST_INCLUDE_DIR} ${HYRISE_SQL
 
 link_directories(${BOOST_LATEST_BIN_DIR} ${HYRISE_SQL_PARSER_BIN_DIR})
 
-add_executable(sql_engine main.cpp row/row.cpp row/row.h table/table.cpp table/table.h page/page.cpp page/page.h
+add_executable(yoSQL main.cpp row/row.cpp row/row.h table/table.cpp table/table.h page/page.cpp page/page.h
 		processor/processor.cpp processor/processor.h engine_instance.cpp engine_instance.h utils.h
-		meta_command_parser/meta_command_parser.cpp meta_command_parser/meta_command_parser.h)
+		meta_command.h)
 
 
-target_link_libraries(sql_engine ${BOOST_LATEST_LIBS} ${HYRISE_SQL_PARSER_LIBS})
+target_link_libraries(yoSQL ${BOOST_LATEST_LIBS} ${HYRISE_SQL_PARSER_LIBS})

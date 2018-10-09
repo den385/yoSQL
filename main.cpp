@@ -1,9 +1,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <thread>
 
 #include "engine_instance.h"
-#include "parser/parser.h"
 
 
 
@@ -52,6 +52,8 @@ int main(int argc, char* argv[])
 		read_statement(std::cin, query);
 
 		bool ok = EngineInstance::instance().ProcessQuery(query);
+
+		std::this_thread::sleep_for(std::chrono::minutes(1));
 
 		if (!ok)
 			break;

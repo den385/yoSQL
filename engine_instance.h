@@ -3,7 +3,9 @@
 #include <memory>
 
 #include "processor/processor.h"
+#include "meta_command.h"
 #include "utils.h"
+
 
 
 class EngineInstance
@@ -25,6 +27,11 @@ public:
 	static SQLProcessor& processor() { return *instance().processor_; }
 
 private:
-	std::unique_ptr<MetaCommandParser> parser_;
+	bool process_meta_command(const std::string& s_command);
+	MetaCommand parse_meta_command(const std::string& s_command);
+
+	bool open_file(const std::string& filename, bool is_new = false);
+
+private:
 	std::unique_ptr<SQLProcessor> processor_;
 };

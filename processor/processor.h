@@ -1,11 +1,13 @@
 #pragma once
 
-#include "command/command.h"
+
+#include "SQLParserResult.h"
+
 
 
 
 class SQLProcessor
 {
 public:
-	void ProcessCommand(const SQLCommand& cmd);
+	void ProcessCommand(const hsql::SQLParserResult& res);
 };

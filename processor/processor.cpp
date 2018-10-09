@@ -2,10 +2,17 @@
 
 
 
-void SQLProcessor::ProcessCommand(const SQLCommand& cmd)
+void SQLProcessor::ProcessCommand(const hsql::SQLParserResult& res)
 {
-	// TODO: switch .meta-cmd vs sql-cmd
+//        const hsql::SQLStatement* statement = result.getStatement(0);
+//
+//        if (statement.isType(hsql::SelectStatement)) {
+//            const hsql::SelectStatement* select = (const hsql::SelectStatement*) statement;
+//            /* ... */
+//        }
 }
+
+
 
 
 
