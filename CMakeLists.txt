@@ -28,14 +28,14 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 
 add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 
-find_package(Boost 1.68.0 REQUIRED COMPONENTS system thread filesystem)
+find_package(Boost 1.68.0 REQUIRED COMPONENTS system thread filesystem serialization)
 
 add_executable(yoSQL main.cpp row/row.cpp row/row.h table/table.cpp table/table.h page/page.cpp page/page.h
 		processor/processor.cpp processor/processor.h engine_instance.cpp engine_instance.h utils.h
-		meta_command.h terminal/terminal.cpp terminal/terminal.h)
+		meta_command.h terminal/terminal.cpp terminal/terminal.h dataunit/dataunit.cpp dataunit/dataunit.h)
 
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
-    target_link_libraries(yoSQL PUBLIC Boost::system Boost::filesystem Boost::thread ${HYRISE_SQLPARSER})
+    target_link_libraries(yoSQL PUBLIC Boost::system Boost::filesystem Boost::thread Boost::serialization ${HYRISE_SQLPARSER})
 endif()

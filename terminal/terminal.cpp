@@ -21,6 +21,12 @@ void Terminal::read_statement(std::string& s)
 	{
 		getline(is_, buf);
 
+		if (buf[0] == '.')
+		{
+			s += buf;
+			break;
+		}
+
 		size_t pos = buf.find(';');
 
 		if (pos != std::string::npos)
@@ -62,5 +68,5 @@ void Terminal::Write(const std::string& message)
 {
 	std::lock_guard<std::mutex> write_lock (write_mx);
 
-	os_ << message << std::endl;
+	os_ << message;
 }

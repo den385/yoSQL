@@ -31,7 +31,7 @@ bool EngineInstance::Run()
 		std::string query = terminal_->Read();
 
 		if(!process_query(query))
-			break;
+			return false;
 	}
 }
 

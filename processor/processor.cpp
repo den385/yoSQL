@@ -1,4 +1,13 @@
 #include "processor/processor.h"
+#include "engine_instance.h"
+#include "row/row.h"
+
+#include <sql/Expr.h>
+#include <boost/serialization/vector.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 
 
@@ -22,11 +31,41 @@ void SQLProcessor::ProcessCommand(const hsql::SQLParserResult& sql_cmd)
 
 void SQLProcessor::execute_select(const hsql::SelectStatement& select_statement)
 {
-	auto expr_list = select_statement.selectList;
-	auto table = select_statement.fromTable;
-	auto table_name = table->name;
-	auto table_schema = table->schema;
+	std::vector<hsql::Expr*>* expr_list = select_statement.selectList;
 
+	EngineInstance::terminal().Write("Got this\n");
+	EngineInstance::terminal().Write("\tselect ");
+
+	for(auto& e : *expr_list)
+	{
+		if (e->getName())
+			EngineInstance::terminal().Write(e->name);
+
+		if (e->type == hsql::ExprType::kExprStar)
+			EngineInstance::terminal().Write("*");
+	}
+
+	std::string table_name = select_statement.fromTable->getName();
+	std::string s = " from " + table_name + ";\n";
+	EngineInstance::terminal().Write(s);
+
+
+
+	std::ostringstream ss;
+
+	std::vector<DataUnit> units;
+	boost::any v = 123;
+	DataUnit u(DataUnit::datatype::Integer, v);
+	units.push_back(u);
+	Row r(units);
+
+	{
+		boost::archive::text_oarchive oa(ss);
+
+		oa << r;
+	}
+
+	EngineInstance::terminal().Write(ss.str());
 
 
 //	Row row;
@@ -54,33 +93,3 @@ void SQLProcessor::execute_insert(const hsql::InsertStatement& insert_statement)
 //
 //	return EXECUTE_SUCCESS;
 }
-
-
-
-//enum ExecuteResult
-//{
-//	EXECUTE_SUCCESS,
-//	EXECUTE_TABLE_FULL
-//};
-//
-//enum MetaCommandResult
-//{
-//	META_COMMAND_EXIT,
-//	META_COMMAND_SUCCESS,
-//	META_COMMAND_UNRECOGNIZED_COMMAND
-//};
-
-
-
-
-//MetaCommandResult do_meta_command(const std::string& input_buffer)
-//{
-//	if (input_buffer == MetaCommands::exit)
-//	{
-//		return META_COMMAND_EXIT;
-//	}
-//	else
-//	{
-//		return META_COMMAND_UNRECOGNIZED_COMMAND;
-//	}
-//}
