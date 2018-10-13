@@ -9,3 +9,5 @@ Sibsankar Haldar, "SQLite Database System: Design and Implementation" (First Ed.
 which is analysis of SQLite3 database
 
 https://www.sqlite.org/
+
+uses Boost libs & hyrise SQL Parser (https://github.com/hyrise/sql-parser/blob/master/src/SQLParser.h)
